@@ -30,7 +30,6 @@ def fetch_comment_data_periodically(subreddit: str, interval: int, limit: int = 
         print(datetime.now().strftime("%x - %X: Fetching Comments for"), subreddit)
         #Grab comments from the subreddit
         comments = get_comments(subreddit, limit)
-        print(comments)
         #Find keyword matches
         if comments: 
           for comment, body in comments:
@@ -68,7 +67,10 @@ def get_comments(subreddit: str, limit: int = 100, timeframe: str="hour"):
     base_url = f'https://www.reddit.com/r/{subreddit}/comments.json?limit={limit}&t={timeframe}'
     res = requests.get(base_url, headers)
     if (res.status_code == 429):
+      print(datetime.now().strftime("%x - %X: Code 429, no comments retrieved. Retry in: "))
       return
+    else:
+      print(res.status_code)
     comments = res.json()["data"]["children"]
     results = []
     for c in comments:
@@ -85,6 +87,8 @@ def scan_comment_for_keywords(comment: str, comment_obj: dict, keywords: dict):
             if p in comment.lower():
                 matches.append({"kind": k, "comment": comment_obj})
                 break
+    if not matches:
+      print(datetime.now().strftime("%x - %X: No matches found"))
     return matches
 
 
